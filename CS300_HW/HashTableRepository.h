@@ -3,6 +3,9 @@
 
 #include <iostream>
 #include <vector>
+#include <string>
+
+using namespace std;
 
 template <typename T>
 class HashTable {
@@ -10,8 +13,9 @@ public:
     HashTable();
     ~HashTable();
 
-    void insert(T data);
-    T getByID(int id);
+    void insert(T* data);
+    T* getByID(int id);
+    T* getByFullName(string firstname, string lastname);
     void remove(int id);
     void display();
 
@@ -19,7 +23,7 @@ public:
     int getCapacity() const;      // Return the current capacity of the hash table
 private:
     struct HashTableNode {
-        T data;
+        T* data;
         int key;
         HashTableNode* next;
     };
@@ -29,7 +33,7 @@ private:
     int itemCount;  // Number of items in the hash table
 
     int hashFunction(int key);
-    void rehash();  // Rehash the hash table to increase the capacity
+    void rehash(int itemCount, float loadFactor);  // Rehash the hash table to increase the capacity
 };
 
 template<typename T>
@@ -57,8 +61,8 @@ int HashTable<T>::hashFunction(int key) {
 }
 
 template<typename T>
-void HashTable<T>::insert(T data) {
-    int key = data.id;
+void HashTable<T>::insert(T* data) {
+    int key = data->id;
     int index = hashFunction(key);
 
     HashTableNode* newNode = new HashTableNode;
@@ -83,12 +87,13 @@ void HashTable<T>::insert(T data) {
 
     float loadFactor = static_cast<float>(itemCount) / capacity;
     if (loadFactor > 0.7f) {
-        rehash();  // Rehash the hash table if the load factor exceeds the threshold
+        rehash(itemCount,loadFactor);  // Rehash the hash table if the load factor exceeds the threshold
+        
     }
 }
 
 template<typename T>
-T HashTable<T>::getByID(int id) {
+T* HashTable<T>::getByID(int id) {
     int index = hashFunction(id);
 
     // Traverse the linked list at the current index to find the data item
@@ -100,8 +105,23 @@ T HashTable<T>::getByID(int id) {
         current = current->next;
     }
 
-    // If the data item is not found, throw an exception
-    throw std::runtime_error("Data item not found.");
+    // If the data item is not found, return nullptr
+    return nullptr;
+}
+
+template<typename T>
+T* HashTable<T>::getByFullName(string firstName, string lastName) {
+    for (int i = 0; i < capacity; i++) {
+        HashTableNode* current = table[i];
+        while (current != nullptr) {
+            if (current->data->firstName == firstName && current->data->lastName == lastName) {
+                return current->data;
+            }
+            current = current->next;
+        }
+    }
+
+    return nullptr;
 }
 
 template<typename T>
@@ -152,7 +172,8 @@ int HashTable<T>::getCapacity() const {
 }
 
 template<typename T>
-void HashTable<T>::rehash() {
+void HashTable<T>::rehash(int itemCount, float loadFactor) {
+
     int newCapacity = capacity * 2;  // Double the capacity
     std::vector<HashTableNode*> newTable(newCapacity, nullptr);
 
@@ -170,6 +191,13 @@ void HashTable<T>::rehash() {
 
     table = std::move(newTable);  // Move the new table into the member variable
     capacity = newCapacity;       // Update the capacity
+
+    std::cout << "Rehashing occurred." << std::endl;
+    std::cout << "Previous Capacity: " << newCapacity / 2 << ", Previous Load: " << static_cast<float>(itemCount / (newCapacity / 2)) << std::endl;
+    std::cout << "Current Capacity: " << newCapacity << ", Current Load: " << static_cast<float>(itemCount / newCapacity) << std::endl;
+    std::cout << "Number of Items: " << itemCount << std::endl;
+    std::cout << std::endl;
+
 }
 
 

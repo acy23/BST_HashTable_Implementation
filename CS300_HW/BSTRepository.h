@@ -10,14 +10,15 @@ public:
     BST();
     ~BST();
 
-    void insert(T data);
-    T getByID(int id);
+    void insert(T* data);
+    T* getByID(int id);
+    T* getByFullName(string firstName, string lastName);
     void remove(int id);
     void display();
 
 private:
     struct BSTNode {
-        T data;
+        T* data;
         BSTNode* left;
         BSTNode* right;
     };
@@ -25,7 +26,7 @@ private:
     BSTNode* root;
 
     void destroy(BSTNode* node);
-    BSTNode* insert(BSTNode* node, T data);
+    //BSTNode* insert(BSTNode* node, T* data);
     BSTNode* remove(BSTNode* node, int id);
     BSTNode* minValueNode(BSTNode* node);
     void displayHelper(BSTNode* node, int level);

@@ -12,59 +12,90 @@ BST<T>::~BST() {
     destroy(root);
 }
 
-// Recursively destroy the binary search tree
 template <typename T>
 void BST<T>::destroy(BSTNode* node) {
-    if (node != nullptr) {
-        destroy(node->left);
-        destroy(node->right);
-        delete node;
+    if (node == nullptr) {
+        return;
+    }
+
+    BSTNode* current = node;
+    BSTNode* temp;
+
+    while (current != nullptr) {
+        if (current->right != nullptr) {
+            temp = current->right;
+            delete current;
+            current = temp;
+        }
     }
 }
 
 // Insert a node into the binary search tree
 template <typename T>
-void BST<T>::insert(T data) {
-    root = insert(root, data);
+void BST<T>::insert(T* data) {
+    BSTNode* newNode = new BSTNode;
+    newNode->data = data;
+    newNode->left = nullptr;
+    newNode->right = nullptr;
+
+    if (root == nullptr) {
+        root = newNode;
+        return;
+    }
+
+    BSTNode* current = root;
+    while (true) {
+        if (data->id < current->data->id) {
+            if (current->left == nullptr) {
+                current->left = newNode;
+                return;
+            }
+            current = current->left;
+        }
+        else if (data->id > current->data->id) {
+            if (current->right == nullptr) {
+                current->right = newNode;
+                return;
+            }
+            current = current->right;
+        }
+        else {
+            // Node with the same id already exists, do nothing
+            delete newNode; // Clean up the unused node
+            return;
+        }
+    }
 }
 
-// Recursively insert a node into the binary search tree
 template <typename T>
-typename BST<T>::BSTNode* BST<T>::insert(BSTNode* node, T data) {
-    if (node == nullptr) {
-        node = new BSTNode;
-        node->data = data;
-        node->left = nullptr;
-        node->right = nullptr;
-    }
-    else if (data.id < node->data.id) {
-        node->left = insert(node->left, data);
-    }
-    else if (data.id > node->data.id) {
-        node->right = insert(node->right, data);
-    }
-    else {
-        // Node with same id already exists, do nothing
-    }
-
-    return node;
-}
-
-template <typename T>
-T BST<T>::getByID(int id) {
+T* BST<T>::getByID(int id) {
     BSTNode* current = root;
     while (current != nullptr) {
-        if (current->data.id == id) {
+        if (current->data->id == id) {
             return current->data;
         }
-        else if (id < current->data.id) {
+        else if (id < current->data->id) {
             current = current->left;
         }
         else {
             current = current->right;
         }
     }
-    throw runtime_error("ID not found in the BST");
+    return nullptr;
+}
+
+template <typename T>
+T* BST<T>::getByFullName(string firstName, string lastName) {
+    BSTNode* current = root;
+    while (current != nullptr) {
+        if (current->data->firstName == firstName && current->data->lastName == lastName) {
+            return current->data;
+        }
+        else {
+            current = current->right;
+        }
+    }
+    return nullptr;
 }
 
 template <typename T>
@@ -77,10 +108,10 @@ typename BST<T>::BSTNode* BST<T>::remove(BSTNode* node, int id) {
     if (node == nullptr) {
         return node;
     }
-    else if (id < node->data.id) {
+    else if (id < node->data->id) {
         node->left = remove(node->left, id);
     }
-    else if (id > node->data.id) {
+    else if (id > node->data->id) {
         node->right = remove(node->right, id);
     }
     else {
@@ -101,7 +132,7 @@ typename BST<T>::BSTNode* BST<T>::remove(BSTNode* node, int id) {
         else {
             BSTNode* temp = findMin(node->right);
             node->data = temp->data;
-            node->right = remove(node->right, temp->data.id);
+            node->right = remove(node->right, temp->data->id);
         }
     }
     return node;
@@ -140,3 +171,5 @@ void BST<T>::displayHelper(BSTNode* node, int level)
     cout << node->data << endl;
     displayHelper(node->left, level + 1);
 }
+
+
